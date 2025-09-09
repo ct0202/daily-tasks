@@ -1,95 +1,93 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import { useState } from 'react';
+import { Task, NewTask } from '../types';
+import { useTasks } from '../hooks/useTasks';
+import { useWeekNavigation } from '../hooks/useWeekNavigation';
+import Header from '../components/Header';
+import KanbanBoard from '../components/KanbanBoard';
+import TaskModal from '../components/TaskModal';
+import '../styles/index.css';
+import '../styles/header.css';
+import '../styles/kanban.css';
+import '../styles/task.css';
+import '../styles/modal.css';
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [showModal, setShowModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [selectedDay, setSelectedDay] = useState('Понедельник');
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
+  const { 
+    addTask, 
+    updateTask, 
+    deleteTask, 
+    toggleTask, 
+    getTasksForDay 
+  } = useTasks();
+
+  const { 
+    weekDates, 
+    goToPreviousWeek, 
+    goToNextWeek, 
+    goToCurrentWeek 
+  } = useWeekNavigation();
+
+  const handleAddTask = (day: string) => {
+    setSelectedDay(day);
+    setEditingTask(null);
+    setShowModal(true);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setShowModal(true);
+  };
+
+  const handleSaveTask = (newTask: NewTask) => {
+    const taskToSave = { ...newTask, day: selectedDay };
+    addTask(taskToSave);
+    setShowModal(false);
+  };
+
+  const handleUpdateTask = (updatedTask: Task) => {
+    updateTask(updatedTask);
+    setShowModal(false);
+    setEditingTask(null);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingTask(null);
+  };
+
+  return (
+    <div className="app">
+      <Header
+        weekDates={weekDates}
+        onPreviousWeek={goToPreviousWeek}
+        onNextWeek={goToNextWeek}
+        onCurrentWeek={goToCurrentWeek}
+      />
+
+      <main className="main-content">
+        <KanbanBoard
+          weekDates={weekDates}
+          onAddTask={handleAddTask}
+          onToggleTask={toggleTask}
+          onEditTask={handleEditTask}
+          onDeleteTask={deleteTask}
+          getTasksForDay={getTasksForDay}
+        />
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <TaskModal
+        isOpen={showModal}
+        editingTask={editingTask}
+        onClose={handleCloseModal}
+        onSave={handleSaveTask}
+        onUpdate={handleUpdateTask}
+      />
     </div>
   );
 }
