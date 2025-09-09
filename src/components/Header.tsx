@@ -10,7 +10,7 @@ export default function Header({ weekDates, onPreviousWeek, onNextWeek, onCurren
   return (
     <header className="header">
       <div className="header-content">
-        <h1 className="app-title">Daily Tasks</h1>
+        <h1 className="app-title">TASKER</h1>
         <div className="week-navigation">
           <button className="nav-button" onClick={onPreviousWeek}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
